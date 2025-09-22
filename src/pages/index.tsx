@@ -10,7 +10,6 @@ export default function Home() {
   return (<>
     <DesktopNavbar />
     <ShreddedCarousel/>
-    <Recommendation title="Recommended for You" products={[]} />
     <Recommendation
       title="Best Sellers"
       products={productData.products.map((p: Product): ProductWithSingleImage => ({
