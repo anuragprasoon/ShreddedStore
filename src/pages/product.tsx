@@ -5,6 +5,7 @@ import DesktopNavbar from "@/components/topnav";
 import Footer from "@/components/footer";
 import Recommendation from "@/components/recommendation";
 import productData from "@/data/products.json";
+import { Product, ProductWithSingleImage } from "@/types/product";
 
 const ProductPage = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -129,9 +130,12 @@ const ProductPage = () => {
     </div>
     <Recommendation
       title="You may also like"
-      products={productData.products.map((p: any) => ({
-        ...p,
-        image: p.images?.[0] || "",
+      products={productData.products.map((p: Product): ProductWithSingleImage => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        description: p.description,
+        image: p.images[0]
       }))}
     />
     <Footer/>
