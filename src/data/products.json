@@ -1,0 +1,70 @@
+{
+  "products": [
+    {
+      "id": "gym-tee-001",
+      "name": "Performance Gym T-Shirt",
+      "price": 1299,
+      "images": [
+        "https://images.unsplash.com/photo-1705585851308-1b1080ba0144",
+        "https://images.unsplash.com/photo-1609713942462-8c6fb0b0af85",
+        "https://images.unsplash.com/photo-1581655353564-df123a1eb820"
+      ],
+      "description": "Premium moisture-wicking gym wear for maximum comfort"
+    },
+    {
+      "id": "gym-hoodie-001",
+      "name": "Essential Training Hoodie",
+      "price": 2499,
+      "images": [
+        "https://images.unsplash.com/photo-1565294124524-200bb738cdb7",
+        "https://images.unsplash.com/photo-1556821840-3a63f95609a7",
+        "https://images.unsplash.com/photo-1542327897-4141b355e20e"
+      ],
+      "description": "Comfortable cotton-blend hoodie for pre and post workout"
+    },
+    {
+      "id": "gym-shorts-001",
+      "name": "Flexible Training Shorts",
+      "price": 999,
+      "images": [
+        "https://images.unsplash.com/photo-1581655353564-df123a1eb820",
+        "https://images.unsplash.com/photo-1589236753795-a06d6d5c9bf5",
+        "https://images.unsplash.com/photo-1591195853828-11db59a44f6b"
+      ],
+      "description": "Breathable shorts with built-in liner for ultimate mobility"
+    },
+    {
+      "id": "gym-tank-001",
+      "name": "Muscle Fit Tank Top",
+      "price": 799,
+      "images": [
+        "https://images.unsplash.com/photo-1617113930975-f9c7243ae527",
+        "https://images.unsplash.com/photo-1547226846-000337daf073",
+        "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61"
+      ],
+      "description": "Sleeveless training top with premium cotton blend"
+    },
+    {
+      "id": "gym-jogger-001",
+      "name": "Premium Track Joggers",
+      "price": 1899,
+      "images": [
+        "https://images.unsplash.com/photo-1483721310020-03333e577078",
+        "https://images.unsplash.com/photo-1606902965551-dce093cda6e7",
+        "https://images.unsplash.com/photo-1617952385804-7b316fa61cf4"
+      ],
+      "description": "Tapered fit joggers with ankle zips for style and comfort"
+    },
+    {
+      "id": "gym-jacket-001",
+      "name": "All-Weather Training Jacket",
+      "price": 2999,
+      "images": [
+        "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
+        "https://images.unsplash.com/photo-1617952385804-7b316fa61cf4",
+        "https://images.unsplash.com/photo-1578932750294-f5075e85f44a"
+      ],
+      "description": "Lightweight water-resistant jacket for outdoor training"
+    }
+  ]
+}
