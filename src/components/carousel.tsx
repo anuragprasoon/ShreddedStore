@@ -31,13 +31,26 @@ const slides = [
 
 const ShreddedCarousel = () => {
   const [current, setCurrent] = React.useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!isAutoPlaying) return;
+    
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, 6000); // Change slide every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
 
   const nextSlide = () => {
     setCurrent((prev) => (prev + 1) % slides.length);
+    setIsAutoPlaying(false); // Pause auto-play when manually navigating
   };
 
   const prevSlide = () => {
     setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+    setIsAutoPlaying(false); // Pause auto-play when manually navigating
   };
 
   return (
@@ -111,7 +124,11 @@ const ShreddedCarousel = () => {
         {slides.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrent(index)}
+            onClick={() => {
+              setCurrent(index);
+              setIsAutoPlaying(false);
+            }}
+            aria-label={`Go to slide ${index + 1}`}
             className={`w-3 h-3 rounded-full ${
               index === current ? "bg-white" : "bg-gray-500"
             }`}

@@ -1,5 +1,9 @@
+'use client';
+
 import React, { useState } from 'react';
-import { ChevronDown, Menu, X, Search, ShoppingBag } from 'lucide-react';
+import { ChevronDown, Menu, X, Search, ShoppingBag, Heart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 
 // Import Urbanist font from Google Fonts
 const UrbanistFont = () => (
@@ -12,6 +16,8 @@ const UrbanistFont = () => (
 const DesktopNavbar = () => {
   const [activeLink, setActiveLink] = useState('Home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { cart = [] } = useCart();
+  const { wishlist = [] } = useWishlist();
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -23,6 +29,7 @@ const DesktopNavbar = () => {
     { name: 'New Arrivals', href: '/collections/new' },
     { name: 'Sale', href: '/collections/sale' },
     { name: 'Premium Collection', href: '/collections/premium' },
+    { name: 'Wishlist', href: '/wishlist' },
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' }
   ];
@@ -74,25 +81,72 @@ const DesktopNavbar = () => {
 
             {/* Desktop Right Section - Actions */}
             <div className="hidden lg:flex items-center space-x-6">
-              <button className="text-gray-600 hover:text-black transition-colors duration-200">
+              <button 
+                className="text-gray-600 hover:text-black transition-colors duration-200"
+                aria-label="Search"
+                title="Search"
+              >
                 <Search className="h-5 w-5" />
               </button>
-              <button className="bg-black text-white px-6 py-2 text-sm font-medium tracking-wider uppercase hover:bg-gray-800 transition-colors duration-200" style={{ fontWeight: 500 }}>
-                Shop Now
-              </button>
+              <a 
+                href="/auth" 
+                className="flex items-center gap-2 text-black border border-black px-6 py-2 text-sm font-medium tracking-wider uppercase hover:bg-black hover:text-white transition-all duration-200"
+              >
+                Login
+              </a>
+              <a 
+                href="/wishlist" 
+                className="text-gray-600 hover:text-black transition-colors duration-200 relative"
+                aria-label="Wishlist"
+                title="Wishlist"
+              >
+                <Heart className="h-5 w-5" />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-2 -right-2 h-4 w-4 bg-black text-white text-xs rounded-full flex items-center justify-center">
+                    {wishlist.length}
+                  </span>
+                )}
+              </a>
+              <a 
+                href="/cart" 
+                className="flex items-center gap-2 bg-black text-white px-6 py-2 text-sm font-medium tracking-wider uppercase hover:bg-gray-800 transition-colors duration-200"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                <span>Cart {cart.length > 0 && `(${cart.length})`}</span>
+              </a>
             </div>
 
             {/* Mobile Right Section */}
             <div className="flex lg:hidden items-center space-x-4">
-              <button className="text-gray-600 hover:text-black transition-colors duration-200">
+              <button 
+                className="text-gray-600 hover:text-black transition-colors duration-200"
+                aria-label="Search"
+                title="Search"
+              >
                 <Search className="h-5 w-5" />
               </button>
-              <button className="text-gray-600 hover:text-black transition-colors duration-200">
+              <a 
+                href="/auth" 
+                className="text-gray-600 hover:text-black transition-colors duration-200"
+              >
+                <span className="text-sm font-medium">Login</span>
+              </a>
+              <a 
+                href="/cart" 
+                className="relative text-gray-600 hover:text-black transition-colors duration-200"
+              >
                 <ShoppingBag className="h-5 w-5" />
-              </button>
+                {cart.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
+              </a>
               <button
                 onClick={toggleMobileMenu}
                 className="text-black hover:text-gray-600 inline-flex items-center justify-center p-2 transition-colors duration-200"
+                aria-label="Toggle menu"
+                title="Toggle menu"
               >
                 {isMobileMenuOpen ? (
                   <X className="block h-6 w-6" />

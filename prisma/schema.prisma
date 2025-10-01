@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  identifier String   @unique  // email or phone
+  createdAt  DateTime @default(now())
+  orders     Order[]
+}
+
+model OtpVerification {
+  id         String   @id @default(cuid())
+  identifier String   // email or phone
+  otp        String
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Order {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  totalAmount     Float
+  status          String    @default("processing")
+  shippingAddress Json
+  items           OrderItem[]
+  createdAt       DateTime  @default(now())
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  name      String
+  price     Float
+  quantity  Int
+  size      String
+  image     String
+}

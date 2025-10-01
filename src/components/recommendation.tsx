@@ -51,7 +51,7 @@ const Recommendation: React.FC<RecommendationProps> = ({ title, products }) => {
 
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-hide scroll-smooth"
+        className="flex gap-4 overflow-x-auto scroll-smooth hide-scrollbar"
       >
         {products.map((product) => (
           <ProductCard
