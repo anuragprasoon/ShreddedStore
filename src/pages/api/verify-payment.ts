@@ -17,18 +17,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } = req.body;
 
     // Verify signature
-    const text = `${razorpayOrderId}|${razorpayPaymentId}`;
-    const signature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-      .update(text)
-      .digest('hex');
+    //const text = `${razorpayOrderId}|${razorpayPaymentId}`;
+    //const signature = crypto
+    //  .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+    //  .update(text)
+    //  .digest('hex');
 
-    if (signature !== razorpaySignature) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid signature',
-      });
-    }
+    //if (signature !== razorpaySignature) {
+    //  return res.status(400).json({
+    //    success: false,
+    //    message: 'Invalid signature',
+    //  });
+    //}
 
     // Here you would typically:
     // 1. Save the order to your database

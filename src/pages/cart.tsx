@@ -10,7 +10,8 @@ import { useRouter } from 'next/router';
 import ShippingForm from '@/components/shippingform';
 import { toast } from 'react-hot-toast';
 
-declare const Razorpay: any;
+import type { RazorpayInterface, RazorpayOptions, RazorpayResponse } from '@/types/razorpay';
+import type { ShippingDetails, OrderData } from '@/types/order';
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity } = useCart();
@@ -19,7 +20,7 @@ const CartPage = () => {
   const [showShippingForm, setShowShippingForm] = React.useState(false);
   const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  const handleCheckout = (shippingDetails: {
+  interface ShippingDetails {
     fullName: string;
     addressLine1: string;
     addressLine2?: string;
@@ -27,7 +28,9 @@ const CartPage = () => {
     state: string;
     pincode: string;
     phone: string;
-  }) => {
+  }
+
+  const handleCheckout = async (shippingDetails: ShippingDetails) => {
     setIsCheckingOut(true);
     handlePayment(shippingDetails)
       .catch((error) => {
@@ -39,8 +42,13 @@ const CartPage = () => {
       });
   };
 
-  const handlePayment = async (shippingAddress: any) => {
+  const handlePayment = async (shippingAddress: ShippingDetails) => {
     try {
+      const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!keyId) {
+        throw new Error('Razorpay key not configured');
+      }
+
       // Create order on server
       const response = await fetch('/api/create-order', {
         method: 'POST',
@@ -48,19 +56,22 @@ const CartPage = () => {
         body: JSON.stringify({ amount: subtotal }),
       });
 
-      const order = await response.json();
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
+
+      const order: OrderData = await response.json();
 
       // Initialize Razorpay
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      const options: RazorpayOptions = {
+        key: keyId,
         amount: order.amount,
         currency: order.currency,
         name: 'Shredded Store',
         description: 'Purchase from Shredded Store',
-        order_id: order.orderId,
-        handler: async (response: any) => {
+        order_id: order.razorpayOrderId,
+        handler: async (response: RazorpayResponse) => {
           try {
-            // Verify payment on server (you'll need to implement this endpoint)
             const verifyResponse = await fetch('/api/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -95,6 +106,7 @@ const CartPage = () => {
               toast.error('Payment verification failed');
             }
           } catch (error) {
+            console.error('Payment verification error:', error);
             toast.error('Error verifying payment');
           }
         },
@@ -107,8 +119,17 @@ const CartPage = () => {
         },
       };
 
-      const razorpayInstance = new Razorpay(options);
-      razorpayInstance.open();
+      if (typeof window === 'undefined' || !window.Razorpay) {
+        throw new Error('Payment system not loaded');
+      }
+
+      try {
+        const razorpay = new window.Razorpay(options);
+        razorpay.open(options);
+      } catch (error) {
+        console.error('Razorpay initialization error:', error);
+        throw new Error('Failed to initialize payment');
+      }
     } catch (error) {
       console.error('Payment error:', error);
       toast.error('Error initiating payment');

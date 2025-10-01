@@ -1,17 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ChevronDown, Menu, X, Search, ShoppingBag, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
-
-// Import Urbanist font from Google Fonts
-const UrbanistFont = () => (
-  <link
-    href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
-);
 
 const DesktopNavbar = () => {
   const [activeLink, setActiveLink] = useState('Home');
@@ -38,19 +31,19 @@ const DesktopNavbar = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  return (
-    <>
-      <UrbanistFont />
-      <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50" style={{ fontFamily: 'Urbanist, sans-serif' }}>
+  return (<>
+    <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 font-urbanist">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo Section */}
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h1 className="text-2xl lg:text-3xl text-black tracking-wide cursor-pointer" style={{ fontWeight: 800, letterSpacing: '0.1em' }}>
-                  SHREDDED
-                </h1>
-                <div className="h-0.5 bg-black w-8 lg:w-12 mt-1"></div>
+                <Link href="/">
+                  <h1 className="text-2xl lg:text-3xl text-black tracking-wide cursor-pointer font-extrabold tracking-widest">
+                    SHREDDED
+                  </h1>
+                  <div className="h-0.5 bg-black w-8 lg:w-12 mt-1"></div>
+                </Link>
               </div>
             </div>
 
@@ -58,7 +51,7 @@ const DesktopNavbar = () => {
             <div className="hidden lg:flex items-center justify-center flex-1">
               <div className="flex items-center space-x-12">
                 {navLinks.map((link) => (
-                  <a
+                  <Link
                     key={link.name}
                     href={link.href}
                     onClick={() => setActiveLink(link.name)}
@@ -74,7 +67,7 @@ const DesktopNavbar = () => {
                     <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-black transform transition-transform duration-300 ${
                       activeLink === link.name ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                     }`}></span>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -88,13 +81,13 @@ const DesktopNavbar = () => {
               >
                 <Search className="h-5 w-5" />
               </button>
-              <a 
+              <Link
                 href="/auth" 
                 className="flex items-center gap-2 text-black border border-black px-6 py-2 text-sm font-medium tracking-wider uppercase hover:bg-black hover:text-white transition-all duration-200"
               >
                 Login
-              </a>
-              <a 
+              </Link>
+              <Link
                 href="/wishlist" 
                 className="text-gray-600 hover:text-black transition-colors duration-200 relative"
                 aria-label="Wishlist"
@@ -106,14 +99,14 @@ const DesktopNavbar = () => {
                     {wishlist.length}
                   </span>
                 )}
-              </a>
-              <a 
+              </Link>
+              <Link
                 href="/cart" 
                 className="flex items-center gap-2 bg-black text-white px-6 py-2 text-sm font-medium tracking-wider uppercase hover:bg-gray-800 transition-colors duration-200"
               >
                 <ShoppingBag className="h-5 w-5" />
                 <span>Cart {cart.length > 0 && `(${cart.length})`}</span>
-              </a>
+              </Link>
             </div>
 
             {/* Mobile Right Section */}
@@ -125,13 +118,13 @@ const DesktopNavbar = () => {
               >
                 <Search className="h-5 w-5" />
               </button>
-              <a 
+              <Link
                 href="/auth" 
                 className="text-gray-600 hover:text-black transition-colors duration-200"
               >
                 <span className="text-sm font-medium">Login</span>
-              </a>
-              <a 
+              </Link>
+              <Link
                 href="/cart" 
                 className="relative text-gray-600 hover:text-black transition-colors duration-200"
               >
@@ -141,7 +134,7 @@ const DesktopNavbar = () => {
                     {cart.length}
                   </span>
                 )}
-              </a>
+              </Link>
               <button
                 onClick={toggleMobileMenu}
                 className="text-black hover:text-gray-600 inline-flex items-center justify-center p-2 transition-colors duration-200"
