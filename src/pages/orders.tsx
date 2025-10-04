@@ -4,9 +4,37 @@ import Image from 'next/image';
 import DesktopNavbar from '@/components/topnav';
 import Footer from '@/components/footer';
 
+interface OrderItem {
+  id: string;
+  name: string;
+  image: string;
+  size: string;
+  quantity: number;
+  price: number;
+}
+
+interface ShippingAddress {
+  fullName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+}
+
+interface Order {
+  id: string;
+  createdAt: string;
+  totalAmount: number;
+  status: string;
+  items: OrderItem[];
+  shippingAddress: ShippingAddress;
+}
+
 const OrdersPage = () => {
   const router = useRouter();
-  const [orders, setOrders] = React.useState([]);
+  const [orders, setOrders] = React.useState<Order[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -53,7 +81,7 @@ const OrdersPage = () => {
 
           {orders.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">You haven't placed any orders yet.</p>
+              <p className="text-gray-600 mb-4">You haven&apos;t placed any orders yet.</p>
               <button
                 onClick={() => router.push('/')}
                 className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
@@ -63,7 +91,7 @@ const OrdersPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {orders.map((order: any) => (
+              {orders.map((order: Order) => (
                 <div
                   key={order.id}
                   className="bg-gray-50 rounded-lg p-6"
@@ -92,7 +120,7 @@ const OrdersPage = () => {
 
                   {/* Order Items */}
                   <div className="space-y-4">
-                    {order.items.map((item: any) => (
+                    {order.items.map((item: OrderItem) => (
                       <div key={`${item.id}-${item.size}`} className="flex gap-4">
                         <div className="relative w-20 h-20">
                           <Image

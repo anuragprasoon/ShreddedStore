@@ -97,7 +97,7 @@ const AuthPage = () => {
                     required
                   />
                   <p className="mt-1 text-sm text-gray-500">
-                    We'll send you a one-time password
+                    We&apos;ll send you a one-time password
                   </p>
                 </div>
 

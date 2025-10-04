@@ -1,4 +1,5 @@
 import { Html, Head, Main, NextScript } from "next/document";
+import Script from "next/script";
 
 export default function Document() {
   return (
@@ -9,10 +10,13 @@ export default function Document() {
           rel="stylesheet"
         />
       </Head>
-            <body>
+      <body>
         <Main />
         <NextScript />
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="beforeInteractive"
+        />
       </body>
     </Html>
   );

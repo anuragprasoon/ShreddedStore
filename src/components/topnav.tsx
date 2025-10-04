@@ -39,10 +39,7 @@ const DesktopNavbar = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <Link href="/">
-                  <h1 className="text-2xl lg:text-3xl text-black tracking-wide cursor-pointer font-extrabold tracking-widest">
-                    SHREDDED
-                  </h1>
-                  <div className="h-0.5 bg-black w-8 lg:w-12 mt-1"></div>
+                  <img src="/shreddedstore.png" alt="Shredded Store" className="h-8 lg:h-10 w-auto" />
                 </Link>
               </div>
             </div>

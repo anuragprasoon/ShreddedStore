@@ -5,6 +5,25 @@ import DesktopNavbar from '@/components/topnav';
 import Footer from '@/components/footer';
 import { Check } from 'lucide-react';
 
+interface OrderItem {
+  id: string;
+  name: string;
+  image: string;
+  size: string;
+  quantity: number;
+  price: number;
+}
+
+interface ShippingAddress {
+  fullName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+}
+
 const OrderConfirmation = () => {
   const router = useRouter();
   const { 
@@ -14,8 +33,8 @@ const OrderConfirmation = () => {
     shippingAddress 
   } = router.query;
 
-  const orderDetails = items ? JSON.parse(decodeURIComponent(items as string)) : [];
-  const address = shippingAddress ? JSON.parse(decodeURIComponent(shippingAddress as string)) : {};
+  const orderDetails: OrderItem[] = items ? JSON.parse(decodeURIComponent(items as string)) : [];
+  const address: ShippingAddress = shippingAddress ? JSON.parse(decodeURIComponent(shippingAddress as string)) : {} as ShippingAddress;
 
   return (
     <>
@@ -58,7 +77,7 @@ const OrderConfirmation = () => {
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
             <h2 className="text-xl font-bold mb-4">Order Items</h2>
             <div className="space-y-4">
-              {orderDetails.map((item: any) => (
+              {orderDetails.map((item: OrderItem) => (
                 <div key={`${item.id}-${item.size}`} className="flex gap-4">
                   <div className="relative w-20 h-20">
                     <Image
