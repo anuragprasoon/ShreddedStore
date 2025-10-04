@@ -48,7 +48,7 @@ const WishlistPage = () => {
                 <Link href={`/product/${item.id}`} className="block">
                   <div className="relative w-full h-64 mb-4">
                     <Image
-                      src={item.image}
+                      src={item.images[0]}
                       alt={item.name}
                       fill
                       className="object-cover rounded-lg"
