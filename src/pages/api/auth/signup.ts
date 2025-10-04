@@ -15,7 +15,7 @@ export default async function handler(
     const { identifier } = req.body;
 
     if (!identifier) {
-      return res.status(400).json({ message: 'Identifier is required' });
+      return res.status(400).json({ message: 'Email or phone is required' });
     }
 
     // Check if user already exists
