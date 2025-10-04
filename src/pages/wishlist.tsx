@@ -60,7 +60,10 @@ const WishlistPage = () => {
                 <button
                   onClick={() => {
                     addToCart({
-                      ...item,
+                      id: item.id,
+                      name: item.name,
+                      price: item.price,
+                      image: item.images[0],
                       quantity: 1,
                       size: 'M' // Default size, you might want to handle this differently
                     });
