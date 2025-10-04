@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 
@@ -15,38 +14,39 @@ export default async function handler(
   }
 
   try {
-    const { email, password } = req.body;
+    const { identifier } = req.body;
 
+    if (!identifier) {
+      return res.status(400).json({ message: 'Identifier is required' });
+    }
+
+    // Check if user exists
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { identifier },
     });
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-
-    if (!isValidPassword) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({ message: 'User not found' });
     }
 
     // Create token
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, identifier: user.identifier },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     // Set cookie
-    res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`);
+    res.setHeader(
+      'Set-Cookie',
+      `token=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`
+    );
 
     return res.status(200).json({
       message: 'Logged in successfully',
       user: {
         id: user.id,
-        email: user.email,
-        name: user.name,
+        identifier: user.identifier,
       },
     });
   } catch (error) {

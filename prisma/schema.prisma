@@ -9,6 +9,8 @@ datasource db {
 
 model User {
   id         String   @id @default(cuid())
+  password String
+  name     String?
   identifier String   @unique  // email or phone
   createdAt  DateTime @default(now())
   orders     Order[]
