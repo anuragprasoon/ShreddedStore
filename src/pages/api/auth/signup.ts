@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -13,26 +12,25 @@ export default async function handler(
   }
 
   try {
-    const { name, email, password } = req.body;
+    const { identifier } = req.body;
+
+    if (!identifier) {
+      return res.status(400).json({ message: 'Identifier is required' });
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { identifier },
     });
 
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     // Create user
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
-        password: hashedPassword,
+        identifier,
       },
     });
 
@@ -40,8 +38,7 @@ export default async function handler(
       message: 'User created successfully',
       user: {
         id: user.id,
-        email: user.email,
-        name: user.name,
+        identifier: user.identifier,
       },
     });
   } catch (error) {
