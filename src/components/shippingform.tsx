@@ -47,7 +47,7 @@ export const ShippingForm: React.FC<ShippingFormProps> = ({ onSubmit, isProcessi
   };
 
   return (
-    <form onSubmit={handleSubmit} className=" text-black space-y-4">
+    <form onSubmit={handleSubmit} className=" text-gray-900 space-y-4">
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
           Full Name
