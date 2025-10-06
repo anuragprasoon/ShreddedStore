@@ -20,6 +20,31 @@ const CartPage = () => {
   const [showShippingForm, setShowShippingForm] = React.useState(false);
   const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
+  const [coupon, setCoupon] = React.useState("");
+const [discount, setDiscount] = React.useState(0);
+
+const offers = [
+  { code: "WELCOME10", desc: "Get 10% off on first order", discount: 0.1 },
+  { code: "FREESHIP", desc: "Free shipping on all orders", discount: 0 }, 
+  { code: "FIT50", desc: "Flat ₹50 off", discount: 50 }
+];
+
+const handleApplyCoupon = () => {
+  const found = offers.find(o => o.code === coupon.toUpperCase());
+  if (found) {
+    if (found.discount < 1) {
+      setDiscount(subtotal * found.discount);
+    } else {
+      setDiscount(found.discount);
+    }
+    toast.success(`Coupon "${found.code}" applied!`);
+  } else {
+    setDiscount(0);
+    toast.error("Invalid coupon code");
+  }
+};
+
+
   interface ShippingDetails {
     fullName: string;
     addressLine1: string;
@@ -219,6 +244,7 @@ const CartPage = () => {
             <div className="bg-gray-50 p-6 rounded-lg h-fit">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
               <div className="space-y-2 mb-4">
+   
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>₹{subtotal}</span>
@@ -228,18 +254,65 @@ const CartPage = () => {
                   <span>Free</span>
                 </div>
               </div>
-              <div className="border-t pt-4">
-                <div className="flex justify-between font-bold mb-6">
-                  <span>Total</span>
-                  <span>₹{subtotal}</span>
-                </div>
-                <button 
-                  className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition" 
-                  onClick={() => setShowShippingForm(true)}
-                >
-                  Proceed to Checkout
-                </button>
-              </div>
+<div className="space-y-2 mb-4">
+  <div className="flex justify-between">
+    <span>Subtotal</span>
+    <span>₹{subtotal}</span>
+  </div>
+  {discount > 0 && (
+    <div className="flex justify-between text-green-600">
+      <span>Discount</span>
+      <span>-₹{discount}</span>
+    </div>
+  )}
+  <div className="flex justify-between">
+    <span>Shipping</span>
+    <span>Free</span>
+  </div>
+</div>
+<div className="border-t pt-4">
+  <div className="flex justify-between font-bold mb-6">
+    <span>Total</span>
+    <span>₹{subtotal - discount}</span>
+  </div>
+               {/* Coupon Section */}
+<div className="mb-4">
+  <label className="block text-sm font-semibold mb-2">Have a Coupon?</label>
+  <div className="flex gap-2">
+    <input
+      type="text"
+      value={coupon}
+      onChange={(e) => setCoupon(e.target.value)}
+      placeholder="Enter code"
+      className="flex-1 border rounded-lg px-3 py-2 text-sm"
+    />
+    <button
+      onClick={handleApplyCoupon}
+      className="bg-black text-white px-4 rounded-lg text-sm hover:bg-gray-800 transition"
+    >
+      Apply
+    </button>
+  </div>
+</div>
+
+{/* Offers List */}
+<div className="mb-6">
+  <p className="text-sm font-semibold mb-2">Available Offers:</p>
+  <ul className="space-y-1 text-sm text-gray-600">
+    {offers.map((o) => (
+      <li key={o.code}>• {o.desc} ({o.code})</li>
+    ))}
+  </ul>
+</div>
+
+  <button
+    className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+    onClick={() => setShowShippingForm(true)}
+  >
+    Proceed to Checkout
+  </button>
+</div>
+
             </div>
           </div>
         </div>
