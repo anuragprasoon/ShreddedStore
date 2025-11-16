@@ -79,12 +79,6 @@ const DesktopNavbar = () => {
                 <Search className="h-5 w-5" />
               </button>
               <Link
-                href="/auth" 
-                className="flex items-center gap-2 text-black border border-black px-6 py-2 text-sm font-medium tracking-wider uppercase hover:bg-black hover:text-white transition-all duration-200"
-              >
-                Login
-              </Link>
-              <Link
                 href="/wishlist" 
                 className="text-gray-600 hover:text-black transition-colors duration-200 relative"
                 aria-label="Wishlist"
@@ -115,12 +109,6 @@ const DesktopNavbar = () => {
               >
                 <Search className="h-5 w-5" />
               </button>
-              <Link
-                href="/auth" 
-                className="text-gray-600 hover:text-black transition-colors duration-200"
-              >
-                <span className="text-sm font-medium">Login</span>
-              </Link>
               <Link
                 href="/cart" 
                 className="relative text-gray-600 hover:text-black transition-colors duration-200"
@@ -164,7 +152,6 @@ const DesktopNavbar = () => {
                     ? 'text-black bg-gray-50' 
                     : 'text-gray-600 hover:text-black hover:bg-gray-50'
                 }`}
-                style={{ fontWeight: 500 }}
               >
                 {link.name}
               </a>
@@ -189,7 +176,6 @@ const DesktopNavbar = () => {
               <button 
                 className="w-full bg-black text-white px-6 py-3 text-sm font-medium tracking-wider uppercase hover:bg-gray-800 transition-colors duration-200"
                 onClick={() => setIsMobileMenuOpen(false)}
-                style={{ fontWeight: 500 }}
               >
                 Shop Now
               </button>

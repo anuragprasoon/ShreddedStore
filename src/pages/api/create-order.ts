@@ -26,7 +26,7 @@ export default async function handler(
     });
 
     res.status(200).json({
-      orderId: order.id,
+      razorpayOrderId: order.id,
       amount: order.amount,
       currency: order.currency,
     });

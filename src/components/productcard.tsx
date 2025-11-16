@@ -4,14 +4,14 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProductCardProps {
-  id: string;
+  pid: string;
   name: string;
   price: number;
   images: string[];
   description?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, images, description }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ pid, name, price, images, description }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const nextImage = () => {
@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, images, desc
       <div className="relative bg-gray-100 rounded-xl mx-2 mt-2 overflow-hidden">
         <div className="relative h-48">
           <Image 
-            src={images[currentImageIndex]} 
+            src={images[currentImageIndex].url} 
             alt={`${name} - Image ${currentImageIndex + 1}`}
             fill
             className="object-cover"
@@ -98,7 +98,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, images, desc
         )}
 
         {/* Order Button */}
-        <Link href="/product">
+        <Link href={`/products/${pid}`}>
           <button className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 px-3 rounded-full transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
             <span className="text-xs tracking-wide uppercase">
               ORDER NOW

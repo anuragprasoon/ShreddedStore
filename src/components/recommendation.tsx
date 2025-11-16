@@ -56,6 +56,7 @@ const Recommendation: React.FC<RecommendationProps> = ({ title, products }) => {
         {products.map((product) => (
           <ProductCard
             key={product.id}
+            pid={product.id}
             {...product}
             images={[product.image]}
           />

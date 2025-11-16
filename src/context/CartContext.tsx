@@ -12,7 +12,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      try {
+        const parsed: any[] = JSON.parse(savedCart);
+        // normalize legacy fields and ensure `image` is a string URL
+        const normalized = parsed.map((it) => {
+          // prefer explicit image, then thumbnail, then first image.url if present
+          let imageVal = it.image ?? it.thumbnail ?? '';
+          if ((!imageVal || imageVal === '') && it.images && it.images.length > 0) {
+            const first = it.images[0];
+            imageVal = typeof first === 'string' ? first : first?.url ?? '';
+          }
+          return {
+            ...it,
+            image: imageVal,
+          };
+        });
+        setCart(normalized);
+      } catch (e) {
+        console.error('Failed to parse saved cart', e);
+        setCart([]);
+      }
     }
   }, []);
 

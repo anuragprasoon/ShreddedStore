@@ -18,29 +18,40 @@ const CartPage = () => {
   const router = useRouter();
   const [isCheckingOut, setIsCheckingOut] = React.useState(false);
   const [showShippingForm, setShowShippingForm] = React.useState(false);
+  const [paymentMethod, setPaymentMethod] = React.useState<'online' | 'cod'>('online');
   const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const [coupon, setCoupon] = React.useState("");
 const [discount, setDiscount] = React.useState(0);
 
 const offers = [
-  { code: "WELCOME10", desc: "Get 10% off on first order", discount: 0.1 },
-  { code: "FREESHIP", desc: "Free shipping on all orders", discount: 0 }, 
-  { code: "FIT50", desc: "Flat ₹50 off", discount: 50 }
+  { code: 'WELCOME10', desc: 'Get 10% off on first order' },
+  { code: 'FREESHIP', desc: 'Free shipping on all orders' },
+  { code: 'FIT50', desc: 'Flat ₹50 off' },
 ];
 
-const handleApplyCoupon = () => {
-  const found = offers.find(o => o.code === coupon.toUpperCase());
-  if (found) {
-    if (found.discount < 1) {
-      setDiscount(subtotal * found.discount);
-    } else {
-      setDiscount(found.discount);
+const handleApplyCoupon = async () => {
+  if (!coupon || coupon.trim() === '') {
+    toast.error('Please enter a coupon code');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/coupons/validate?code=${encodeURIComponent(coupon)}`);
+    const data = await res.json();
+    if (!res.ok || !data.valid) {
+      setDiscount(0);
+      toast.error(data.message || 'Invalid coupon code');
+      return;
     }
-    toast.success(`Coupon "${found.code}" applied!`);
-  } else {
-    setDiscount(0);
-    toast.error("Invalid coupon code");
+
+    // API returns integer discount (interpreted as flat rupee amount)
+    const disc = Number(data.discount) || 0;
+    setDiscount(disc);
+    toast.success(`Coupon "${data.coupon}" applied!`);
+  } catch (err) {
+    console.error('Coupon apply error', err);
+    toast.error('Error applying coupon');
   }
 };
 
@@ -53,18 +64,80 @@ const handleApplyCoupon = () => {
     state: string;
     pincode: string;
     phone: string;
+    paymentMethod: 'online' | 'cod';
   }
 
   const handleCheckout = async (shippingDetails: ShippingDetails) => {
     setIsCheckingOut(true);
-    handlePayment(shippingDetails)
-      .catch((error) => {
-        console.error('Checkout error:', error);
-        toast.error('Error during checkout');
-      })
-      .finally(() => {
-        setIsCheckingOut(false);
+    setPaymentMethod(shippingDetails.paymentMethod);
+    
+    // If Cash on Delivery, skip Razorpay and save order directly
+    if (shippingDetails.paymentMethod === 'cod') {
+      await handleCODCheckout(shippingDetails);
+    } else {
+      // If Online Payment, proceed with Razorpay
+      handlePayment(shippingDetails)
+        .catch((error) => {
+          console.error('Checkout error:', error);
+          toast.error('Error during checkout');
+        })
+        .finally(() => {
+          setIsCheckingOut(false);
+        });
+    }
+  };
+
+  const handleCODCheckout = async (shippingAddress: ShippingDetails) => {
+    try {
+      const finalAmount = subtotal - discount;
+      
+      // Create order directly without Razorpay payment
+      const verifyPayload = {
+        razorpayOrderId: `COD-${Date.now()}`,
+        razorpayPaymentId: null,
+        razorpaySignature: null,
+        shippingAddress,
+        orderItems: cart,
+        totalAmount: finalAmount,
+        currency: 'INR',
+        paymentMethod: 'cod',
+      };
+
+      console.log('Posting COD order to /api/verify-payment:', verifyPayload);
+
+      const verifyResponse = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(verifyPayload),
       });
+
+      const data = await verifyResponse.json();
+
+      if (data.success) {
+        toast.success('Order placed successfully! You will receive payment instructions via email/SMS.');
+        // Clear cart
+        cart.forEach(item => removeFromCart(item.id, item.size));
+        
+        // Redirect to order confirmation page
+        router.push({
+          pathname: '/order-confirmation',
+          query: {
+            orderId: verifyPayload.razorpayOrderId,
+            amount: finalAmount,
+            paymentMethod: 'cod',
+            items: encodeURIComponent(JSON.stringify(cart)),
+            shippingAddress: encodeURIComponent(JSON.stringify(shippingAddress))
+          }
+        });
+      } else {
+        toast.error('Error creating order');
+      }
+    } catch (error) {
+      console.error('COD checkout error:', error);
+      toast.error('Error during checkout');
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   const handlePayment = async (shippingAddress: ShippingDetails) => {
@@ -74,11 +147,15 @@ const handleApplyCoupon = () => {
         throw new Error('Razorpay key not configured');
       }
 
+      // Calculate payment method discount
+      const paymentMethodDiscount = shippingAddress.paymentMethod === 'online' ? 100 : 0;
+      const finalAmount = subtotal - discount - paymentMethodDiscount;
+
       // Create order on server
       const response = await fetch('/api/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: subtotal }),
+        body: JSON.stringify({ amount: finalAmount }),
       });
 
       if (!response.ok) {
@@ -97,17 +174,26 @@ const handleApplyCoupon = () => {
         order_id: order.razorpayOrderId,
         handler: async (response: RazorpayResponse) => {
           try {
+            // Log what Razorpay returned
+            console.log('Razorpay success handler called with response:', response);
+
+            const verifyPayload = {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              shippingAddress,
+              orderItems: cart,
+              totalAmount: finalAmount,
+              currency: 'INR',
+              paymentMethod: shippingAddress.paymentMethod,
+            };
+
+            console.log('Posting to /api/verify-payment:', verifyPayload);
+
             const verifyResponse = await fetch('/api/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-                shippingAddress,
-                orderItems: cart,
-                totalAmount: subtotal,
-              }),
+              body: JSON.stringify(verifyPayload),
             });
 
             const data = await verifyResponse.json();
@@ -122,7 +208,7 @@ const handleApplyCoupon = () => {
                 pathname: '/order-confirmation',
                 query: {
                   orderId: response.razorpay_order_id,
-                  amount: subtotal,
+                  amount: finalAmount,
                   items: encodeURIComponent(JSON.stringify(cart)),
                   shippingAddress: encodeURIComponent(JSON.stringify(shippingAddress))
                 }
@@ -194,12 +280,26 @@ const handleApplyCoupon = () => {
                 <div key={`${item.id}-${item.size}`} className="flex gap-4 bg-white p-4 rounded-lg border">
                   {/* Product Image */}
                   <div className="relative w-24 h-24">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover rounded-md"
-                    />
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover rounded-md"
+                      />
+                    ) : (
+                      // fallback if older cart items used `thumbnail` key
+                      (item as any).thumbnail ? (
+                        <Image
+                          src={(item as any).thumbnail}
+                          alt={item.name}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 rounded-md" />
+                      )
+                    )}
                   </div>
                   
                   {/* Product Details */}
@@ -243,17 +343,7 @@ const handleApplyCoupon = () => {
             {/* Order Summary */}
             <div className="bg-gray-50 p-6 rounded-lg h-fit">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              <div className="space-y-2 mb-4">
-   
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>₹{subtotal}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>Free</span>
-                </div>
-              </div>
+              
 <div className="space-y-2 mb-4">
   <div className="flex justify-between">
     <span>Subtotal</span>
@@ -261,8 +351,14 @@ const handleApplyCoupon = () => {
   </div>
   {discount > 0 && (
     <div className="flex justify-between text-green-600">
-      <span>Discount</span>
+      <span>Coupon Discount</span>
       <span>-₹{discount}</span>
+    </div>
+  )}
+  {paymentMethod === 'online' && (
+    <div className="flex justify-between text-green-600">
+      <span>Online Payment Discount</span>
+      <span>-₹100</span>
     </div>
   )}
   <div className="flex justify-between">
@@ -273,7 +369,7 @@ const handleApplyCoupon = () => {
 <div className="border-t pt-4">
   <div className="flex justify-between font-bold mb-6">
     <span>Total</span>
-    <span>₹{subtotal - discount}</span>
+    <span>₹{subtotal - discount - (paymentMethod === 'online' ? 100 : 0)}</span>
   </div>
                {/* Coupon Section */}
 <div className="mb-4">
@@ -305,11 +401,48 @@ const handleApplyCoupon = () => {
   </ul>
 </div>
 
+{/* Payment Method Selection */}
+<div className="mb-6 border-t pt-4">
+  <label className="block text-sm font-semibold mb-3">Payment Method</label>
+  <div className="space-y-2">
+    <label className="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition">
+      <input
+        type="radio"
+        name="paymentMethod"
+        value="online"
+        checked={paymentMethod === 'online'}
+        onChange={(e) => setPaymentMethod('online')}
+        className="mr-3"
+      />
+      <div>
+        <span className="font-medium text-sm">Online Payment</span>
+        <p className="text-xs text-green-600">Get ₹100 discount</p>
+        <p className="text-xs text-gray-500">UPI / Debit Card / Credit Card</p>
+      </div>
+    </label>
+    <label className="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition">
+      <input
+        type="radio"
+        name="paymentMethod"
+        value="cod"
+        checked={paymentMethod === 'cod'}
+        onChange={(e) => setPaymentMethod('cod')}
+        className="mr-3"
+      />
+      <div>
+        <span className="font-medium text-sm">Cash on Delivery</span>
+        <p className="text-xs text-gray-500">Pay when you receive your order</p>
+      </div>
+    </label>
+  </div>
+</div>
+
   <button
-    className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+    className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50"
     onClick={() => setShowShippingForm(true)}
+    disabled={isCheckingOut}
   >
-    Proceed to Checkout
+    {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
   </button>
 </div>
 
@@ -322,14 +455,23 @@ const handleApplyCoupon = () => {
       {showShippingForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl text-black font-bold mb-4">Shipping Details</h2>
+            <h2 className="text-xl text-black font-bold mb-2">
+              {paymentMethod === 'online' ? 'Shipping Details' : 'Delivery Address'}
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              {paymentMethod === 'online' 
+                ? 'Enter your address for delivery' 
+                : 'We will collect payment on delivery at this address'}
+            </p>
             <ShippingForm 
               onSubmit={handleCheckout}
               isProcessing={isCheckingOut}
+              paymentMethod={paymentMethod}
             />
             <button
               onClick={() => setShowShippingForm(false)}
               className="mt-4 w-full py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+              disabled={isCheckingOut}
             >
               Cancel
             </button>

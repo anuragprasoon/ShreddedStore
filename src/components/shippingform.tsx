@@ -9,23 +9,13 @@ interface ShippingFormProps {
     state: string;
     pincode: string;
     phone: string;
-  }) => void;
-}
-
-interface ShippingFormProps {
-  onSubmit: (data: {
-    fullName: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
-    pincode: string;
-    phone: string;
+    paymentMethod: 'online' | 'cod';
   }) => void;
   isProcessing?: boolean;
+  paymentMethod?: 'online' | 'cod';
 }
 
-export const ShippingForm: React.FC<ShippingFormProps> = ({ onSubmit, isProcessing = false }) => {
+export const ShippingForm: React.FC<ShippingFormProps> = ({ onSubmit, isProcessing = false, paymentMethod = 'online' }) => {
   const [formData, setFormData] = React.useState({
     fullName: '',
     addressLine1: '',
@@ -34,6 +24,7 @@ export const ShippingForm: React.FC<ShippingFormProps> = ({ onSubmit, isProcessi
     state: '',
     pincode: '',
     phone: '',
+    paymentMethod: paymentMethod,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -163,8 +154,9 @@ export const ShippingForm: React.FC<ShippingFormProps> = ({ onSubmit, isProcessi
       <button
         type="submit"
         className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+        disabled={isProcessing}
       >
-        Continue to Payment
+        {isProcessing ? 'Processing...' : 'Complete Order'}
       </button>
     </form>
   );
