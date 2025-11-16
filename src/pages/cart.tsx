@@ -289,9 +289,9 @@ const handleApplyCoupon = async () => {
                       />
                     ) : (
                       // fallback if older cart items used `thumbnail` key
-                      (item as any).thumbnail ? (
+                      (item as unknown as Record<string, unknown>).thumbnail ? (
                         <Image
-                          src={(item as any).thumbnail}
+                          src={(item as unknown as Record<string, unknown>).thumbnail as string}
                           alt={item.name}
                           fill
                           className="object-cover rounded-md"

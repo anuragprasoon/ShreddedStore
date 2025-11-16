@@ -23,7 +23,7 @@ type ProductRow = {
   stock?: Record<string, number> | null;
   category?: string | null;
   brand?: string | null;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -174,7 +174,7 @@ const ProductDetailPage = ({ product }: Props) => {
                     id: productIdStr,
                     name: product.name,
                     price: product.price,
-                    image: typeof images[0] === 'string' ? images[0] : (images[0] as any)?.url ?? product.thumbnail ?? '',
+                    image: typeof images[0] === 'string' ? images[0] : (images[0] as unknown as Record<string, unknown>)?.url as string ?? product.thumbnail ?? '',
                     quantity,
                     size: selectedSize,
                   });
@@ -233,8 +233,8 @@ const ProductDetailPage = ({ product }: Props) => {
             <div className="mt-6">
               <p className="font-medium mb-2">Product Details</p>
               <div className="text-gray-500 text-sm space-y-1 list-disc list-inside">
-                <div>Material: {product.metadata?.material ?? 'Premium Breathable Fabric'}</div>
-                <div>Fit: {product.metadata?.fit ?? 'Slim Fit'}</div>
+                <div>Material: {product.metadata ? (product.metadata as Record<string, unknown>).material as string ?? 'Premium Breathable Fabric' : 'Premium Breathable Fabric'}</div>
+                <div>Fit: {product.metadata ? (product.metadata as Record<string, unknown>).fit as string ?? 'Slim Fit' : 'Slim Fit'}</div>
                 <div>Designed for Maximum Comfort & Flexibility</div>
               </div>
             </div>
@@ -260,7 +260,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
   // construct base URL from request headers
   const host = req.headers.host;
-  const proto = (req.headers['x-forwarded-proto'] as string) || (req.connection && (req.connection as any).encrypted ? 'https' : 'http');
+  const proto = (req.headers['x-forwarded-proto'] as string) || (req.connection && (req.connection as unknown as Record<string, unknown>).encrypted ? 'https' : 'http');
   const base = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
   try {

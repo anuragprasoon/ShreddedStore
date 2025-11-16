@@ -19,7 +19,7 @@ type Product = {
   stock?: Record<string, number> | null;
   category?: string | null;
   brand?: string | null;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
   is_active: boolean;
   created_at?: string;
 };
