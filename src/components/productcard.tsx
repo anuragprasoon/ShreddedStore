@@ -3,13 +3,26 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+interface ImageObject {
+  url: string;
+}
+
+type ImageType = string | ImageObject;
+
 interface ProductCardProps {
   pid: string;
   name: string;
   price: number;
-  images: string[];
+  images: ImageType[];
   description?: string;
 }
+
+const getImageUrl = (image: ImageType): string => {
+  if (typeof image === 'string') {
+    return image;
+  }
+  return image?.url ?? '';
+};
 
 const ProductCard: React.FC<ProductCardProps> = ({ pid, name, price, images, description }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -36,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ pid, name, price, images, des
       <div className="relative bg-gray-100 rounded-xl mx-2 mt-2 overflow-hidden">
         <div className="relative h-48">
           <Image 
-            src={images[currentImageIndex].url} 
+            src={getImageUrl(images[currentImageIndex])} 
             alt={`${name} - Image ${currentImageIndex + 1}`}
             fill
             className="object-cover"
