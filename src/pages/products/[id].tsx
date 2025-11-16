@@ -9,6 +9,12 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { toast, Toaster } from 'react-hot-toast';
 
+interface ImageObject {
+  url: string;
+}
+
+type ImageType = string | ImageObject;
+
 type ProductRow = {
   id: number;
   sku?: string;
@@ -17,7 +23,7 @@ type ProductRow = {
   description?: string | null;
   price: number;
   currency?: string;
-  images?: string[] | null;
+  images?: ImageType[] | null;
   thumbnail?: string | null;
   available_sizes?: string[] | null;
   stock?: Record<string, number> | null;
@@ -31,6 +37,13 @@ type ProductRow = {
 
 type Props = {
   product: ProductRow | null;
+};
+
+const getImageUrl = (image: ImageType): string => {
+  if (typeof image === 'string') {
+    return image;
+  }
+  return image?.url ?? '';
 };
 
 const ProductDetailPage = ({ product }: Props) => {
@@ -105,7 +118,7 @@ const ProductDetailPage = ({ product }: Props) => {
               images.map((image, idx) => (
                 <div key={idx} className="relative w-full h-64 md:h-[500px]">
                   <Image 
-                    src={image.url} 
+                    src={getImageUrl(image)} 
                     alt={`${product.name} - Image ${idx + 1}`} 
                     fill 
                     className="object-cover rounded-xl" 
@@ -174,7 +187,7 @@ const ProductDetailPage = ({ product }: Props) => {
                     id: productIdStr,
                     name: product.name,
                     price: product.price,
-                    image: typeof images[0] === 'string' ? images[0] : (images[0] as unknown as Record<string, unknown>)?.url as string ?? product.thumbnail ?? '',
+                    image: getImageUrl(images[0] ?? ''),
                     quantity,
                     size: selectedSize,
                   });
@@ -191,7 +204,7 @@ const ProductDetailPage = ({ product }: Props) => {
                     removeFromWishlist(productIdStr);
                     toast.success('Removed from wishlist!');
                   } else {
-                    addToWishlist({ id: productIdStr, name: product.name, price: product.price, images: images });
+                    addToWishlist({ id: productIdStr, name: product.name, price: product.price, images: images.map(getImageUrl) });
                     toast.success('Added to wishlist!');
                   }
                 }}
@@ -242,7 +255,7 @@ const ProductDetailPage = ({ product }: Props) => {
         </div>
       </div>
 
-      <Recommendation title="You may also like" products={(product.images ?? []).slice(0, 6).map((src, i) => ({ id: `${product.id}`, name: product.name, price: product.price, description: product.description ?? '', image: src }))} />
+      <Recommendation title="You may also like" products={(product.images ?? []).slice(0, 6).map((src, i) => ({ id: `${product.id}`, name: product.name, price: product.price, description: product.description ?? '', image: getImageUrl(src) }))} />
       <Footer />
     </>
   );
