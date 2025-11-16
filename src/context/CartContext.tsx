@@ -13,18 +13,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        const parsed: any[] = JSON.parse(savedCart);
+        const parsed: unknown[] = JSON.parse(savedCart);
         // normalize legacy fields and ensure `image` is a string URL
-        const normalized = parsed.map((it) => {
+        const normalized: CartItem[] = parsed.map((it: unknown) => {
+          const item = it as Record<string, unknown>;
           // prefer explicit image, then thumbnail, then first image.url if present
-          let imageVal = it.image ?? it.thumbnail ?? '';
-          if ((!imageVal || imageVal === '') && it.images && it.images.length > 0) {
-            const first = it.images[0];
-            imageVal = typeof first === 'string' ? first : first?.url ?? '';
+          let imageVal = (item.image as string | undefined) ?? (item.thumbnail as string | undefined) ?? '';
+          if ((!imageVal || imageVal === '') && item.images && Array.isArray(item.images) && item.images.length > 0) {
+            const first = item.images[0] as unknown;
+            if (typeof first === 'string') {
+              imageVal = first;
+            } else if (first && typeof first === 'object' && 'url' in first) {
+              imageVal = (first as Record<string, unknown>).url as string ?? '';
+            }
           }
           return {
-            ...it,
+            id: item.id as string,
+            name: item.name as string,
+            price: item.price as number,
             image: imageVal,
+            quantity: item.quantity as number,
+            size: item.size as string,
           };
         });
         setCart(normalized);

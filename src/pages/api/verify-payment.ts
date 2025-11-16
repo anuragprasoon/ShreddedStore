@@ -2,6 +2,13 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 import supabaseServer from '@/lib/supabaseServer';
 
+interface ErrorResponse {
+  code?: string;
+  details: unknown;
+  hint: unknown;
+  message: string;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -101,7 +108,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (error) {
       console.error('Error inserting order to Supabase:', error);
       // If RLS is blocking the insert return a helpful message
-      if ((error as any)?.code === '42501') {
+      const errorObj = error as ErrorResponse;
+      if (errorObj?.code === '42501') {
         return res.status(500).json({ success: false, message: 'Insert blocked by Row Level Security (RLS). Ensure SUPABASE_SERVICE_ROLE_KEY is set for server-side requests or update RLS policies to allow this operation.' });
       }
       return res.status(500).json({ success: false, message: 'Failed to save order' });
