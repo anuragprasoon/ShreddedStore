@@ -322,6 +322,11 @@ const ProductPage = () => {
         image: p.images[0]
       }))}
     />
+    <div className="fixed bottom-2 right-2">
+        <a href="https://api.whatsapp.com/send/?phone=917003634432&text=Hi">
+          <img src="https://res.cloudinary.com/dibrmj6nh/image/upload/v1747946474/Frame_1597884222_xnchxt.png" className="w-[50px]"/>
+        </a>
+    </div>
     <Footer/>
     </>
   );

@@ -14,8 +14,8 @@ const DesktopNavbar = () => {
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Top wear', href: '/topwear' },
-    { name: 'Bottom wear', href: '/bottomwear' }
+    { name: 'Men', href: '/Men' },
+    { name: 'Women', href: '/Women' }
   ];
 
   const secondaryLinks = [
